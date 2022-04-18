@@ -1,6 +1,6 @@
-HOST1=phci-11
-HOST2=phci-12
-HOST3=phci-13
+HOST1=phci-31
+HOST2=phci-32
+HOST3=phci-33
 SEG_NAME=test_segment
 
 show_host() {

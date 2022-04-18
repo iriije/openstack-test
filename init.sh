@@ -4,7 +4,7 @@
 
 ## admin-openrc.sh 실행
 #kolla-ansible post-deploy
-. /etc/kolla/admin-openrc.sh
+#. /etc/kolla/admin-openrc.sh
 
 # 인스턴스 생성을 위한 이미지 등록
 ## 이미지 다운로드
@@ -17,7 +17,7 @@ curl -L http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img > ci
 ### cirros
 openstack image create cirros-0.5.2-x86_64-disk.img --container-format bare --disk-format qcow2 --private --file cirros-0.5.2-x86_64-disk.img --property hw_architecture='x86_64'
 ### ubuntu
-openstack image create focal-server-cloudimg-amd64.img --container-format bare --disk-format qcow2 --public --file focal-server-cloudimg-amd64.img --property hw_architecture='x86_64'
+#openstack image create focal-server-cloudimg-amd64.img --container-format bare --disk-format qcow2 --public --file focal-server-cloudimg-amd64.img --property hw_architecture='x86_64'
 
 # default flavor 생성
 openstack flavor create --id 0 --ram 512   --vcpus 1 --disk 10  m1.tiny

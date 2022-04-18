@@ -1,13 +1,15 @@
 PREFIX=test
-FLAVOR=m1.medium
+FLAVOR=m1.small
 IMAGE=focal-server-cloudimg-amd64.img
 SUBNET=default
+FIP='true'
 N=6
-OPT='--boot-from-volume 10'
+BOOT_VOLUME='false'
 HOST='all'
-HA='True'
+HA='false'
 host_conf=""
-ha_conf="--property HA_Enabled=True"
+boot_volume=''
+ha_conf=""
 
 
 main() {	
@@ -33,7 +35,7 @@ main() {
 				break;;
 			"1" ) : ;;
 			"2" ) show_instance_detail;;
-			"3" ) create_instances $N $OPT;;
+			"3" ) create_instances;;
 			"4" ) delete;;	
 			"5" ) config;;
 			"*" ) echo "wrong number";;
@@ -68,10 +70,17 @@ show_instance_detail() {
 }
 
 create_instances() {
-	for num in $(seq $1)
+	for num in $(seq $N)
 	do
-	    openstack server create --flavor $FLAVOR --image $IMAGE --security-group allow_tcp_udp_icmp $host_conf $ha_conf --nic net-id=$SUBNET $2 $3 test${num}
+	    openstack server create --flavor $FLAVOR --image $IMAGE --security-group allow_tcp_udp_icmp $boot_volume $host_conf $ha_conf --nic net-id=$SUBNET $2 test${num}
 	done
+	sleep 5s
+	if [ $FIP == 'true' ]; then
+		for num in $(seq $N)
+		do
+	    		openstack server add floating ip test${num} $(openstack floating ip create provider | grep floating_ip | awk '{ print $4 }')
+		done
+	fi
 }
 
 delete_with_name() {
@@ -89,6 +98,7 @@ delete_with_state() {
 delete_all() {
 	server_list=$(openstack server list | awk 'NR > 3 {print $2}')
 	delete_instances
+	openstack floating ip delete $(openstack floating ip list | grep None | awk '{print $2}')
 }
 
 delete_instances() {
@@ -103,12 +113,11 @@ delete_instances() {
 	do
 		openstack volume delete --force $volume
 	done
-	openstack server list
 }
 
 config() {
-	echo "select what you want config (prefix, flavor, image, subnet, n, opt, host, ha): "
-	echo $PREFIX $FLAVOR $IMAGE $SUBNET $N $OPT $HOST $HA
+	echo "select what you want config (prefix, flavor, image, subnet, fip, n, boot_volume, host, ha): "
+	echo $PREFIX $FLAVOR $IMAGE $SUBNET $FIP $N $BOOT_VOLUME $HOST $HA
 	read conf
 	case $conf in
 		"prefix" )
@@ -127,19 +136,27 @@ config() {
 		        echo $SUBNET	
 			read SUBNET
                         echo $SUBNET;;
+		"fip" )   
+			echo $FIP
+			read FIP
+                        echo $FIP;;
 		"n" )   
 			echo $N
 			read N
                         echo $N;;
-		"opt" ) 
-			echo $OPT
-			read OPT
-                        echo $OPT;;
+		"boot_volume" ) 
+			echo $BOOT_VOLUME
+			read BOOT_VOLUME
+			boot_volume=""
+			if [ $BOOT_VOLUME == 'true' ]; then
+				boot_volume="--boot-from-volume 10"
+			fi
+                        echo $BOOT_VOLUME;;
 		"ha" )
 			echo $HA
 			read HA
 		        ha_conf=""
-                	if [ $HA == 'True' ]; then
+                	if [ $HA == 'true' ]; then
 		                ha_conf="--property HA_Enabled=True"
 		        fi
 			echo $HA;;
