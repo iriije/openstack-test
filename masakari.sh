@@ -1,7 +1,7 @@
-HOST1=phci-31
-HOST2=phci-32
-HOST3=phci-33
-SEG_NAME=test_segment
+HOST1=host-1
+HOST2=host-2
+HOST3=host-3
+SEG_NAME=segment1
 
 show_host() {
 	openstack compute service list

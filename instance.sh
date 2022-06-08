@@ -1,15 +1,15 @@
 PREFIX=test
-FLAVOR=m1.small
-IMAGE=focal-server-cloudimg-amd64.img
-SUBNET=default
-FIP='true'
-N=6
-BOOT_VOLUME='false'
+FLAVOR=c1m1
+IMAGE=ubuntu20.04-ssh-root-admin
+SUBNET="management network"
+FIP='false'
+N=50
+BOOT_VOLUME='true'
 HOST='all'
-HA='false'
+HA='true'
 host_conf=""
-boot_volume=''
-ha_conf=""
+boot_volume='--boot-from-volume 10'
+ha_conf="--property HA_Enabled=True"
 
 
 main() {	
@@ -72,7 +72,7 @@ show_instance_detail() {
 create_instances() {
 	for num in $(seq $N)
 	do
-	    openstack server create --flavor $FLAVOR --image $IMAGE --security-group allow_tcp_udp_icmp $boot_volume $host_conf $ha_conf --nic net-id=$SUBNET $2 test${num}
+	    openstack server create --flavor $FLAVOR --image $IMAGE --security-group allow_tcp_udp_icmp $boot_volume $host_conf $ha_conf --nic net-id="$SUBNET" test${num}
 	done
 	sleep 5s
 	if [ $FIP == 'true' ]; then
@@ -147,17 +147,17 @@ config() {
 		"boot_volume" ) 
 			echo $BOOT_VOLUME
 			read BOOT_VOLUME
-			boot_volume=""
-			if [ $BOOT_VOLUME == 'true' ]; then
-				boot_volume="--boot-from-volume 10"
+			boot_volume="--boot-from-volume 10"
+			if [ $BOOT_VOLUME == 'false' ]; then
+				boot_volume=""
 			fi
                         echo $BOOT_VOLUME;;
 		"ha" )
 			echo $HA
 			read HA
-		        ha_conf=""
-                	if [ $HA == 'true' ]; then
-		                ha_conf="--property HA_Enabled=True"
+		        ha_conf="--property HA_Enabled=True"
+                	if [ $HA == 'false' ]; then
+		                ha_conf=""
 		        fi
 			echo $HA;;
 		"host" )
